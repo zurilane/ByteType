@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeByte</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            padding: 20px; 
+            background-color: #f8f9fa;
+        }
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 48px;
+            display: inline-block;
+            margin: 0;
+            color: #333;
+        }
+        .alpha-badge {
+            display: inline-block;
+            background-color: gold;
+            color: black;
+            font-weight: bold;
+            padding: 5px 10px;
+            margin-left: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            vertical-align: middle;
+        }
+        .text-container { 
+            font-size: 20px; 
+            margin: 20px 0; 
+        }
+        .input-box { 
+            width: 100%; 
+            padding: 10px; 
+            font-size: 18px; 
+        }
+        .correct { 
+            background-color: lightgreen; 
+        }
+        .error { 
+            background-color: red; 
+            color: white; 
+        }
+        .wpm, .accuracy { 
+            font-weight: bold; 
+            margin-top: 10px; 
+        }
+        select {
+            font-size: 16px;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>TypeByte</h1><span class="alpha-badge">ALPHA</span>
+    <br><br>
+    <label for="difficulty">Choose Difficulty: </label>
+    <select id="difficulty">
+        <option value="medium" selected>Medium</option>
+        <option value="easy">Easy</option>
+        <option value="hard">Hard</option>
+    </select>
+    <p class="text-container" id="text"></p>
+    <input type="text" class="input-box" id="input" placeholder="Start typing here...">
+    <p class="wpm" id="wpm"></p>
+    <p class="accuracy" id="accuracy"></p>
+
+    <script>
+        const wordBanks = {
+            easy: ["dog", "cat", "run", "walk", "jump", "play", "sun", "moon", "tree", "happy"],
+            medium: ["practice", "typing", "fundamental", "skill", "digital", "accuracy", "master", "consistency", "speed", "efficiency"],
+            hard: ["perseverance", "synchronization", "metamorphosis", "inconsequential", "magnanimous", "superfluous", "quintessential", "anachronistic", "discombobulate", "verisimilitude"]
+        };
+
+        let textElement = document.getElementById("text");
+        let inputElement = document.getElementById("input");
+        let wpmElement = document.getElementById("wpm");
+        let accuracyElement = document.getElementById("accuracy");
+        let difficultyElement = document.getElementById("difficulty");
+        let startTime = null;
+        let text = "";
+
+        function generateText() {
+            let difficulty = difficultyElement.value;
+            let words = wordBanks[difficulty];
+            let sentence = [];
+            for (let i = 0; i < 50; i++) {
+                sentence.push(words[Math.floor(Math.random() * words.length)]);
+            }
+            text = sentence.join(" ");
+            textElement.textContent = text;
+            inputElement.value = "";
+            startTime = null;
+            wpmElement.textContent = "";
+            accuracyElement.textContent = "";
+        }
+
+        difficultyElement.addEventListener("change", generateText);
+        generateText();
+
+        inputElement.addEventListener("input", function () {
+            if (!startTime) startTime = Date.now();
+            let inputText = inputElement.value;
+            let formattedText = "";
+            let mistakes = 0;
+            let correct = 0;
+
+            for (let i = 0; i < text.length; i++) {
+                if (i < inputText.length) {
+                    if (inputText[i] === text[i]) {
+                        formattedText += `<span class='correct'>${text[i]}</span>`;
+                        correct++;
+                    } else {
+                        formattedText += `<span class='error'>${text[i]}</span>`;
+                        mistakes++;
+                    }
+                } else {
+                    formattedText += text[i];
+                }
+            }
+
+            textElement.innerHTML = formattedText;
+            let totalTyped = inputText.length;
+            let accuracy = totalTyped > 0 ? Math.round((correct / totalTyped) * 100) : 100;
+            accuracyElement.textContent = `Accuracy: ${accuracy}%`;
+
+            if (inputText === text) {
+                let duration = (Date.now() - startTime) / 60000;
+                let words = text.split(" ").length;
+                let wpm = Math.round(words / duration);
+                wpmElement.textContent = `WPM: ${wpm}`;
+                setTimeout(generateText, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
